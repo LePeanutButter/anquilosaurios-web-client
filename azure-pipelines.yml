@@ -1,0 +1,120 @@
+# ASP.NET
+# Build and test ASP.NET projects.
+# Add steps that publish symbols, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
+
+trigger:
+  branches:
+    include:
+      - develop
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+
+variables:
+  solution: '**/*.sln'
+  buildConfiguration: 'Release'
+  artifactName: 'drop'
+  azureSubscription: 'My-Azure-Service-Connection'  # replace with your service connection
+  appServiceName: 'my-blazor-app'                   # replace with your App Service name
+
+stages:
+
+  - stage: Build
+    displayName: 'Build & Test'
+    jobs:
+      - job: BuildAndTest
+        displayName: 'Restore → Build → Test'
+        pool:
+          vmImage: 'windows-latest'
+        steps:
+
+          - task: NuGetToolInstaller@1
+            displayName: 'Install NuGet Latest'
+
+          - task: Cache@2
+            displayName: 'Cache NuGet packages'
+            inputs:
+              key: 'nuget | "$(Agent.OS)" | **/*.csproj'
+              restoreKeys: |
+                nuget | "$(Agent.OS)"
+              path: $(Pipeline.Workspace)/.nuget/packages
+
+          - task: DotNetCoreCLI@2
+            displayName: 'dotnet restore'
+            inputs:
+              command: restore
+              projects: '$(solution)'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'dotnet build'
+            inputs:
+              command: build
+              projects: '$(solution)'
+              arguments: '--configuration $(buildConfiguration) --no-restore'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'dotnet test'
+            inputs:
+              command: test
+              projects: '**/*Tests/*.csproj'
+              arguments: '--configuration $(buildConfiguration) --no-build --logger "trx;LogFileName=test_results.trx"'
+
+          - task: PublishTestResults@2
+            displayName: 'Publish Test Results'
+            inputs:
+              testResultsFiles: '**/test_results.trx'
+              testRunTitle: 'Unit Tests'
+
+  - stage: Publish
+    displayName: 'Publish Symbols & Artifacts'
+    dependsOn: Build
+    jobs:
+      - job: Publish
+        displayName: 'dotnet publish → pipeline artifact'
+        pool:
+          vmImage: 'windows-latest'
+        steps:
+
+          - task: DotNetCoreCLI@2
+            displayName: 'dotnet publish Blazor App'
+            inputs:
+              command: publish
+              projects: 'src/YourBlazorApp/YourBlazorApp.csproj'
+              arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish build artifact'
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)'
+              artifact: '$(artifactName)'
+
+  - stage: Deploy
+    displayName: 'Deploy to Production'
+    dependsOn: Publish
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployWebApp
+        displayName: 'Azure App Service Deployment'
+        environment: 'production'    # requires an environment in Azure DevOps for approvals
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+
+                - download: current
+                  artifact: '$(artifactName)'
+
+                - task: AzureWebApp@1
+                  displayName: 'Deploy artifact to Azure Web App'
+                  inputs:
+                    azureSubscription: '$(azureSubscription)'
+                    appType: 'webApp'
+                    appName: '$(appServiceName)'
+                    package: '$(Pipeline.Workspace)/$(artifactName)'
+
