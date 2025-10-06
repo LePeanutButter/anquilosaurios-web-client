@@ -1,0 +1,63 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  NODE_VERSION: '20.x'
+  FRONTEND_PROD_DEPLOYMENT_TOKEN: $(FRONTEND_PROD_DEPLOYMENT_TOKEN)
+
+jobs:
+  - job: BUILD_Anquilosaurios_main
+    displayName: 'Build Stage for Anquilosaurios (main)'
+    steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '$(NODE_VERSION)'
+        displayName: 'Build: Set Up Node.js Environment'
+
+      - task: Cache@2
+        inputs:
+          key: 'npm | "$(Agent.OS)" | package-lock.json'
+          restoreKeys: |
+            npm | "$(Agent.OS)"
+          path: ~/.npm
+        displayName: 'Build: Cache npm Dependencies'
+
+      - script: |
+          npm ci
+          npm run lint
+          npm run check
+        displayName: 'Build: Install Dependencies, Lint & Type Check'
+
+      - script: |
+          npm run build
+        displayName: 'Build: Compile Source Code'
+
+  - job: DEPLOY_Anquilosaurios_prod
+    displayName: 'Deploy Stage for Anquilosaurios (Production)'
+    dependsOn: BUILD_Anquilosaurios_main
+    condition: succeeded()
+    steps:
+      - task: AzureStaticWebApp@0
+        inputs:
+          app_location: '/'
+          output_location: 'build'
+          azure_static_web_apps_api_token: $(FRONTEND_PROD_DEPLOYMENT_TOKEN)
+          is_static_export: true
+        displayName: 'Deploy: Push to Azure Static Web Apps (Production)'
+
+      - task: ManualValidation@0
+        inputs:
+          instructions: 'Approve deployment to production'
+        displayName: 'Deploy: Manual Approval for Production Release'
+        condition: succeeded()

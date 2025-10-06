@@ -1,0 +1,56 @@
+trigger:
+  branches:
+    include:
+      - development
+
+pr:
+  branches:
+    include:
+      - development
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  NODE_VERSION: '20.x'
+  FRONTEND_STAGING_DEPLOYMENT_TOKEN: $(FRONTEND_STAGING_DEPLOYMENT_TOKEN)
+
+jobs:
+  - job: BUILD_Anquilosaurios_development
+    displayName: 'Build Stage for Anquilosaurios (development)'
+    steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '$(NODE_VERSION)'
+        displayName: 'Build: Set Up Node.js Environment'
+
+      - task: Cache@2
+        inputs:
+          key: 'npm | "$(Agent.OS)" | package-lock.json'
+          restoreKeys: |
+            npm | "$(Agent.OS)"
+          path: ~/.npm
+        displayName: 'Build: Cache npm Dependencies'
+
+      - script: |
+          npm ci
+          npm run lint
+          npm run check
+        displayName: 'Build: Install Dependencies, Lint & Type Check'
+
+      - script: |
+          npm run build
+        displayName: 'Build: Compile Source Code'
+
+  - job: DEPLOY_Anquilosaurios_development
+    displayName: 'Deploy Stage for Anquilosaurios (Staging)'
+    dependsOn: BUILD_Anquilosaurios_development
+    condition: succeeded()
+    steps:
+      - task: AzureStaticWebApp@0
+        inputs:
+          app_location: '/'
+          output_location: 'build'
+          azure_static_web_apps_api_token: $(FRONTEND_STAGING_DEPLOYMENT_TOKEN)
+          is_static_export: true
+        displayName: 'Deploy: Push to Azure Static Web Apps (Staging)'
