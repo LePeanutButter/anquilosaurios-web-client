@@ -73,22 +73,22 @@ UI designs and user flows are maintained in **Figma**, with system diagrams avai
 
 ## Tools
 
-| Tool         | Purpose                                      |
-|--------------|----------------------------------------------|
-| Figma        | Frontend UI/UX design                        |
-| Miro         | Business logic and architecture diagrams     |
-| Azure        | Cloud deployment and storage                 |
-| GitHub       | Version control and collaboration            |
-| Azure DevOps | CI/CD pipelines and project tracking         |
+| Tool         | Purpose                                  |
+| ------------ | ---------------------------------------- |
+| Figma        | Frontend UI/UX design                    |
+| Miro         | Business logic and architecture diagrams |
+| Azure        | Cloud deployment and storage             |
+| GitHub       | Version control and collaboration        |
+| Azure DevOps | CI/CD pipelines and project tracking     |
 
 ## Maintainers
 
-- [Lanapequin](https://github.com/Lanapequin) - Laura Natalia Perilla Quintero  
-- [LePeanutButter](https://github.com/LePeanutButter) - Santiago Botero Garcia  
+- [Lanapequin](https://github.com/Lanapequin) - Laura Natalia Perilla Quintero
+- [LePeanutButter](https://github.com/LePeanutButter) - Santiago Botero Garcia
 - [shiro](https://github.com/JoseDavidCastillo) - Jose David Castillo Rodriguez
 
-
 ## License
+
 [MIT](/LICENSE) © Richard Littauer
 
 This README follows the <u>**Standard Readme**</u> specification.
