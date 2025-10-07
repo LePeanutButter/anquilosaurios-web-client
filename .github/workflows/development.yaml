@@ -108,7 +108,7 @@ jobs:
           app-name: 'anquilosaurios-development-frontend'
           slot-name: 'Production'
           package: build
-      
+
       # Step 4: Logout from Azure to clean up session
       - name: Logout from Azure
         run: az logout
