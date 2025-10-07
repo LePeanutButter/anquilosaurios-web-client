@@ -92,13 +92,11 @@ jobs:
           name: node-app
           path: build
 
-      # Step 2: Authenticate with Azure using OIDC credentials stored in GitHub Secrets
-      - name: Login to Azure
-        uses: azure/login@v2
+      # Step 2: Login using service principal credentials
+      - name: Login to Azure using service principal
+        uses: azure/login@v1
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_A0978EA65C00422281D7D25B3F034D8B }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_9AA9893C6B6440E59E2A67398ED273A5 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_08EFD7D25A374FA28D824EB9E525258A }}
+          creds: ${{ secrets.AZURE_DEV_ENVIRONMENT }}
 
       # Step 3: Deploy the downloaded build to the Azure Web App service
       - name: Deploy to Azure Web App
