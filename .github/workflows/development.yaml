@@ -68,30 +68,40 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build
-          path: build
+          name: node-app
+          path: .
 
   # =========================================
   # Job: Deploy Stage
-  # Purpose: Deploy the built app to staging (Azure SWA)
+  # Purpose: Deploy the built app to staging
   # Depends on: build
   # =========================================
   deploy:
     name: Deploy Stage for Anquilosaurios (Staging)
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       # Step 1: Download the build artifacts from previous job
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: build
+          name: node-app
 
-      # Step 2: Deploy to Azure Static Web Apps
-      - name: Deploy to Azure Static Web Apps (Staging)
-        uses: Azure/static-web-apps-deploy@v1
+      # Step 2: Authenticate with Azure using OIDC credentials stored in GitHub Secrets
+      - name: Login to Azure
+        uses: azure/login@v2
         with:
-          azure_static_web_apps_api_token: ${{ secrets.FRONTEND_STAGING_DEPLOYMENT_TOKEN }}
-          app_location: '/'
-          output_location: 'build'
-          skip_app_build: true
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C2193A217B9C42E5A793A7A059CE01F2 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_F09DB818996647A2B6D677AB0A8753FD }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_6E50FB326ECD4EA5A07F0602855DFA6B }}
+
+      # Step 3: Deploy the downloaded build to the Azure Web App service
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'anquilosaurios-development-frontend'
+          slot-name: 'Production'
+          package: .
