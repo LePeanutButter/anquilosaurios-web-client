@@ -77,6 +77,7 @@ jobs:
   # Depends on: build
   # =========================================
   deploy:
+    if: github.event_name == 'push'
     name: Deploy Stage for Anquilosaurios (Staging)
     needs: build
     runs-on: ubuntu-latest
