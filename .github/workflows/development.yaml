@@ -96,12 +96,13 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C2193A217B9C42E5A793A7A059CE01F2 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_F09DB818996647A2B6D677AB0A8753FD }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_6E50FB326ECD4EA5A07F0602855DFA6B }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_A0978EA65C00422281D7D25B3F034D8B }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_9AA9893C6B6440E59E2A67398ED273A5 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_08EFD7D25A374FA28D824EB9E525258A }}
 
       # Step 3: Deploy the downloaded build to the Azure Web App service
       - name: Deploy to Azure Web App
+        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'anquilosaurios-development-frontend'
