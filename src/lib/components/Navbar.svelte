@@ -1,13 +1,11 @@
 <script>
   const menuItems = [
-    { name: "Jugar ahora", href: "/jugar" },
     { name: "Cuenta", href: "/cuenta" },
     { name: "Comunidad", href: "/comunidad" },
     { name: "Soporte", href: "/soporte" },
     { name: "Legal y Privacidad", href: "/legal" },
     { name: "Accesibilidad", href: "/accesibilidad" },
     { name: "Tienda", href: "/tienda" },
-    { name: "Conócenos", href: "/conocenos" },
   ];
 </script>
 
