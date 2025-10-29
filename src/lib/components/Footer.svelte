@@ -3,7 +3,7 @@
 </script>
 
 <footer class="footer">
-  <p>© {currentYear} Boom Budies . Todos los derechos reservados.</p>
+  <p>© {currentYear} POWER GARDEN: Juicy Brawl!. Todos los derechos reservados.</p>
   <div class="links">
     <button class="link-btn">Términos</button>
     <button class="link-btn">Privacidad</button>

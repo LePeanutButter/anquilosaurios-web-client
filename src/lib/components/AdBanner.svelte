@@ -1,11 +1,6 @@
 <script lang="ts">
-  export let imageUrl: string = "https://cdn.jsdelivr.net/gh/andresvivas/placeholder/adbanner.jpg";
   export let altText: string = "Publicidad del juego";
 </script>
-
-<div class="ad-banner">
-  <img src={imageUrl} alt={altText} loading="lazy" />
-</div>
 
 <style>
   .ad-banner {

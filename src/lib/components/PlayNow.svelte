@@ -18,8 +18,8 @@
   <Navbar />
   <main class="home">
     <section class="hero">
-      <h1>Bienvenido a Boom Budies</h1>
-      <p>Prepárate para vivir la experiencia definitiva del juego embebido.</p>
+      <h1>Bienvenido a POWER GARDEN: Juicy Brawl!</h1>
+      <p>Prepárate para vivir la experiencia definitiva del juego.</p>
       <CTA text="Jugar Ahora" onClick={handlePlayClick} />
     </section>
 

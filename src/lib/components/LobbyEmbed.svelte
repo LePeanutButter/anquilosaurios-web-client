@@ -60,7 +60,7 @@
     class="game-frame"
     bind:this={iframeEl}
     src={iframeSrc}
-    title="Juego embebido de Boom Budies"
+    title="Juego embebido de POWER GARDEN: Juicy Brawl!"
     allow="fullscreen; autoplay; encrypted-media"
     loading="lazy"
     on:load={onIframeLoad}

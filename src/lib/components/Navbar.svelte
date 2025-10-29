@@ -11,7 +11,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
   <div class="container-fluid">
-    <a class="navbar-brand fw-bold" href="/">Boom Budies</a>
+    <a class="navbar-brand fw-bold" href="/">POWER GARDEN: Juicy Brawl!</a>
 
     <button
       class="navbar-toggler"
