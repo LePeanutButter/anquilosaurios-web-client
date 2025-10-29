@@ -1,5 +1,5 @@
-import { writable } from "svelte/store";
-import type { Writable } from "svelte/store";
+import { writable } from 'svelte/store';
+import type { Writable } from 'svelte/store';
 
 export type UserRegisterDTO = { id?: string; name?: string; email?: string };
 export type LobbyInfo = { lobbyId?: string; name?: string; status?: string };
@@ -8,17 +8,17 @@ export type Bundle = { key: string; url: string; version?: string; size?: number
 export const currentUser: Writable<UserRegisterDTO | null> = writable(null);
 export const cachedAssets: Writable<Record<string, Bundle>> = writable({});
 export const activeLobby: Writable<LobbyInfo | null> = writable(null);
-export const locale = writable("en");
+export const locale = writable('en');
 export const accessibilityPrefs = writable<Record<string, any>>({});
 export const isAuthenticated = writable(false);
 
 // UI store helpers
 export const uiStore = {
-  setCurrentUser: (u: UserRegisterDTO) => currentUser.set(u),
-  clearUser: () => currentUser.set(null),
-  cacheAsset: (key: string, bundle: Bundle) => {
-    cachedAssets.update(m => ({ ...m, [key]: bundle }));
-  },
-  setLocale: (l: string) => locale.set(l),
-  setAccessibility: (k: string, v: any) => accessibilityPrefs.update(s => ({ ...s, [k]: v })),
+	setCurrentUser: (u: UserRegisterDTO) => currentUser.set(u),
+	clearUser: () => currentUser.set(null),
+	cacheAsset: (key: string, bundle: Bundle) => {
+		cachedAssets.update((m) => ({ ...m, [key]: bundle }));
+	},
+	setLocale: (l: string) => locale.set(l),
+	setAccessibility: (k: string, v: any) => accessibilityPrefs.update((s) => ({ ...s, [k]: v }))
 };
