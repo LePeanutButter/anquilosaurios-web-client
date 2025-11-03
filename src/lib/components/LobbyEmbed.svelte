@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';  // ✅ sin onDestroy
+	import { onMount } from 'svelte'; // ✅ sin onDestroy
 	import Navbar from './Navbar.svelte';
 	import Footer from './Footer.svelte';
 

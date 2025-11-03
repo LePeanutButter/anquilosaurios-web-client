@@ -1,12 +1,23 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { resolveRoute } from '$app/paths'; // 🔹 Agregado para resolver rutas
+
+	onMount(() => {
+		console.log('Navbar montada');
+	});
+
 	const menuItems = [
-		{ name: 'Cuenta', href: '/cuenta' },
 		{ name: 'Comunidad', href: '/comunidad' },
 		{ name: 'Soporte', href: '/soporte' },
 		{ name: 'Legal y Privacidad', href: '/legal' },
 		{ name: 'Accesibilidad', href: '/accesibilidad' },
 		{ name: 'Tienda', href: '/tienda' }
 	];
+
+	function navigateTo(href: string) {
+		goto(resolveRoute(href as unknown as `/`));
+	}
 </script>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
@@ -29,7 +40,14 @@
 			<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
 				{#each menuItems as item (item.href)}
 					<li class="nav-item">
-						<a class="nav-link" href={item.href}>{item.name}</a>
+						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+						<a
+							class="nav-link"
+							href={item.href}
+							on:click|preventDefault={() => navigateTo(item.href)}
+						>
+							{item.name}
+						</a>
 					</li>
 				{/each}
 			</ul>
