@@ -5,11 +5,13 @@ export type UserRegisterDTO = { id?: string; name?: string; email?: string };
 export type LobbyInfo = { lobbyId?: string; name?: string; status?: string };
 export type Bundle = { key: string; url: string; version?: string; size?: number };
 
+export type AccessibilityPrefs = Record<string, boolean | string | number | null>;
+
 export const currentUser: Writable<UserRegisterDTO | null> = writable(null);
 export const cachedAssets: Writable<Record<string, Bundle>> = writable({});
 export const activeLobby: Writable<LobbyInfo | null> = writable(null);
 export const locale = writable('en');
-export const accessibilityPrefs = writable<Record<string, any>>({});
+export const accessibilityPrefs = writable<AccessibilityPrefs>({});
 export const isAuthenticated = writable(false);
 
 // UI store helpers
@@ -20,5 +22,6 @@ export const uiStore = {
 		cachedAssets.update((m) => ({ ...m, [key]: bundle }));
 	},
 	setLocale: (l: string) => locale.set(l),
-	setAccessibility: (k: string, v: any) => accessibilityPrefs.update((s) => ({ ...s, [k]: v }))
+	setAccessibility: (k: keyof AccessibilityPrefs, v: AccessibilityPrefs[typeof k]) =>
+		accessibilityPrefs.update((s) => ({ ...s, [k]: v }))
 };

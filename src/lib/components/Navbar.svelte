@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	const menuItems = [
 		{ name: 'Cuenta', href: '/cuenta' },
 		{ name: 'Comunidad', href: '/comunidad' },
@@ -27,7 +27,7 @@
 
 		<div class="collapse navbar-collapse" id="mainMenu">
 			<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-				{#each menuItems as item}
+				{#each menuItems as item (item.href)}
 					<li class="nav-item">
 						<a class="nav-link" href={item.href}>{item.name}</a>
 					</li>

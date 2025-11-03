@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';  // ✅ sin onDestroy
 	import Navbar from './Navbar.svelte';
 	import Footer from './Footer.svelte';
 
@@ -17,20 +17,16 @@
 				return;
 			}
 
-			// inyecta CSS para ocultar todo excepto #unity-container
 			const css = `
-        /* Oculta TODO el body */
-        body > * { display: none !important; }
-        /* Muestra únicamente el unity container */
-        #unity-container { display: block !important; position: static !important; width: 100% !important; height: 100% !important; }
-        html, body { height: 100%; margin: 0; }
-      `;
+				body > * { display: none !important; }
+				#unity-container { display: block !important; position: static !important; width: 100% !important; height: 100% !important; }
+				html, body { height: 100%; margin: 0; }
+			`;
 			const style = doc.createElement('style');
 			style.type = 'text/css';
 			style.appendChild(doc.createTextNode(css));
 			doc.head.appendChild(style);
 
-			// opcional: si quieres desplazar el container para que llene el iframe
 			const container = doc.getElementById('unity-container');
 			if (container) {
 				container.style.width = '100%';
@@ -45,7 +41,6 @@
 	}
 
 	onMount(() => {
-		// prevenir respuestas automáticas a mensajes (evitar loops)
 		function msgLog(e: MessageEvent) {
 			console.log('[PARENT] iframe message:', e.origin, e.data);
 		}
