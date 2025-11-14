@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import Navbar from './Navbar.svelte';
 	import Footer from './Footer.svelte';
 
@@ -7,27 +6,8 @@
 
 	let iframeEl: HTMLIFrameElement | null = null;
 
-	onMount(() => {
-		function msgLog(e: MessageEvent) {
-			if (e.origin !== new URL(iframeSrc).origin) return;
-
-			console.log('[PARENT] message from Unity:', e.data);
-
-			if (e.data.type === 'READY') {
-				console.log('[PARENT] Unity is ready!');
-				iframeEl?.contentWindow?.postMessage({ type: 'START_GAME' }, e.origin);
-			}
-		}
-
-		window.addEventListener('message', msgLog);
-
-		return () => window.removeEventListener('message', msgLog);
-	});
-
 	function onIframeLoad() {
-		if (!iframeEl) return;
-		iframeEl.contentWindow?.postMessage({ type: 'INIT' }, new URL(iframeSrc).origin);
-		console.log('[PARENT] sent INIT to Unity');
+		console.log('[PARENT] Unity WebGL iframe loaded');
 	}
 </script>
 
