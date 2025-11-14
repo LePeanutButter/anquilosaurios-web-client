@@ -9,12 +9,26 @@
 
 	onMount(() => {
 		function msgLog(e: MessageEvent) {
-			console.log('[PARENT] iframe message:', e.origin, e.data);
+			if (e.origin !== new URL(iframeSrc).origin) return;
+
+			console.log('[PARENT] message from Unity:', e.data);
+
+			if (e.data.type === 'READY') {
+				console.log('[PARENT] Unity is ready!');
+				iframeEl?.contentWindow?.postMessage({ type: 'START_GAME' }, e.origin);
+			}
 		}
+
 		window.addEventListener('message', msgLog);
 
 		return () => window.removeEventListener('message', msgLog);
 	});
+
+	function onIframeLoad() {
+		if (!iframeEl) return;
+		iframeEl.contentWindow?.postMessage({ type: 'INIT' }, new URL(iframeSrc).origin);
+		console.log('[PARENT] sent INIT to Unity');
+	}
 </script>
 
 <Navbar />
@@ -26,6 +40,7 @@
 		title="Juego embebido de POWER GARDEN: Juicy Brawl!"
 		allow="fullscreen; autoplay; encrypted-media"
 		loading="lazy"
+		on:load={onIframeLoad}
 	></iframe>
 </main>
 <Footer />
