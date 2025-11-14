@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { onMount } from 'svelte'; // ✅ sin onDestroy
+	import { onMount } from 'svelte';
 	import Navbar from './Navbar.svelte';
 	import Footer from './Footer.svelte';
 
-	const iframeSrc = import.meta.env.VITE_AZURE_GAME_URL;
+	const iframeSrc = '/game';
 
 	let iframeEl: HTMLIFrameElement | null = null;
 	let initialized = false;
