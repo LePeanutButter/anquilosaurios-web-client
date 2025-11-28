@@ -2,6 +2,8 @@
 # GitHub Actions Workflow: CI Build & Deploy
 # Environment: Development
 # Description:
+#   - Runs Vitest tests and generates coverage (Istanbul)
+#   - Performs SonarCloud static analysis
 #   - Builds and deploys the Anquilosaurios frontend app
 #   - Runs on every push or pull request to 'development'
 # ===========================================
@@ -24,11 +26,114 @@ on:
 # -------------------------------------------
 jobs:
   # =========================================
+  # Job: Dynamic Analysis (Tests + Coverage)
+  # Purpose: Run Vitest tests and generate coverage for SonarCloud
+  # =========================================
+  test_and_coverage:
+    name: Vitest Tests & Coverage
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout source code
+      - name: Checkout project
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Step 2: Setup Node
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Step 3: Cache npm dependencies
+      - name: Cache npm dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}
+
+      # Step 4: Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 5: Run tests with coverage (Istanbul)
+      - name: Run Vitest with coverage
+        run: npm run test:coverage
+
+      # Step 6: Upload test results
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Test-Results
+          path: ./coverage
+
+      # Step 7: Upload coverage results (lcov / json)
+      - name: Upload Coverage Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Coverage
+          path: coverage
+
+  # =========================================
+  # Job: SonarCloud Scan
+  # Purpose: Run static code analysis with SonarCloud
+  # =========================================
+  sonar_scan:
+    name: Sonar Cloud static analysis
+    needs: test_and_coverage
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout source code
+      - name: Checkout project
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Step 2: Install Java
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # Step 3: Cache SonarCloud packages
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      # Step 4: Download coverage artifact
+      - name: Download Coverage Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Coverage
+          path: coverage
+
+      # Step 5: Debug coverage files
+      - name: List coverage files
+        run: |
+          echo "Coverage artifact content:"
+          find coverage -type f | sed 's/^/ - /'
+
+      # Step 6: Run SonarCloud scan
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  # =========================================
   # Job: Build Stage
   # Purpose: Lint, type-check, and build the app
   # =========================================
   build:
-    name: Build Stage for Anquilosaurios (development)
+    name: Build Stage for Anquilosaurios (Development)
+    needs: sonar_scan
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -78,7 +183,7 @@ jobs:
   # =========================================
   deploy:
     if: github.event_name == 'push'
-    name: Deploy Stage for Anquilosaurios (Staging)
+    name: Deploy Stage for Anquilosaurios (development)
     needs: build
     runs-on: ubuntu-latest
     permissions:
