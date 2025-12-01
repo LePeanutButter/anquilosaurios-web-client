@@ -68,7 +68,7 @@ jobs:
         if: always()
         with:
           name: Coverage
-          path: coverage/lcov.info
+          path: coverage
 
   # =========================================
   # Job: SonarCloud Scan
