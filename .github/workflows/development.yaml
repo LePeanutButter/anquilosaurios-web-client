@@ -67,7 +67,7 @@ jobs:
         if: always()
         with:
           name: Test-Results
-          path: ./coverage
+          path: coverage
 
       # Step 7: Upload coverage results (lcov / json)
       - name: Upload Coverage Artifacts
@@ -201,7 +201,7 @@ jobs:
       - name: Login to Azure using service principal
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_DEV_ENVIRONMENT }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # Step 3: Deploy the downloaded build to the Azure Web App service
       - name: Deploy to Azure Web App
