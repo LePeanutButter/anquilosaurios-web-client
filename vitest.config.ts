@@ -7,7 +7,7 @@ export default defineConfig({
 		setupFiles: './src/setupTests.ts',
 
 		coverage: {
-      		provider: 'istanbul',
+			provider: 'istanbul',
 			reportsDirectory: 'coverage',
 			reporter: ['text', 'lcov', 'json', 'html'],
 			include: ['src/lib/**/*.{ts,svelte}', 'src/routes/**/*.{ts,svelte}'],
@@ -18,7 +18,7 @@ export default defineConfig({
 				'dist/**',
 				'coverage/**',
 				'vite.config.*',
-				'vitest.config.*', 
+				'vitest.config.*',
 				'**/*.svelte'
 			]
 		}

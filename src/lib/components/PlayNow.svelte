@@ -19,7 +19,7 @@
 
   <PlayNow />
 -->
-  
+
 <script lang="ts">
 	import CTA from './CTA.svelte';
 	import AdBanner from './AdBanner.svelte';

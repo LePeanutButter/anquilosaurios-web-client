@@ -205,7 +205,6 @@ jobs:
       - name: Save Docker Image
         run: docker save anquilo-frontend -o frontend.tar
 
-
       # Step 5: Upload the saved Docker image tarball as a workflow artifact
       - name: Upload Docker image artifact
         uses: actions/upload-artifact@v4

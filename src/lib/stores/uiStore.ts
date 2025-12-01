@@ -35,7 +35,6 @@ export type Bundle = { key: string; url: string; version?: string; size?: number
  */
 export type AccessibilityPrefs = Record<string, boolean | string | number | null>;
 
-
 /** Writable store for the currently logged-in user. */
 export const currentUser: Writable<UserRegisterDTO | null> = writable(null);
 
