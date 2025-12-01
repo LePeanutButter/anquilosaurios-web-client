@@ -1,18 +1,40 @@
+<!--
+  @component Navbar
+
+  Renders the site navigation bar with menu items and responsive collapse behavior.
+
+  ## Features
+
+  - Displays brand name linking to the homepage.
+  - Responsive menu with Bootstrap classes.
+  - Menu items include Comunidad, Soporte, Legal y Privacidad, Accesibilidad, and Tienda.
+  - Uses Svelte's `goto` for client-side navigation.
+  - Logs a message on component mount.
+
+  ## Props
+
+  None.
+
+  ## Usage
+
+  <Navbar />
+-->
+  
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { resolveRoute } from '$app/paths'; // 🔹 Agregado para resolver rutas
+	import { resolveRoute } from '$app/paths';
 
 	onMount(() => {
 		console.log('Navbar montada');
 	});
 
 	const menuItems = [
-		{ name: 'Comunidad', href: '/comunidad' },
-		{ name: 'Soporte', href: '/soporte' },
+		{ name: 'Comunidad', href: '/community' },
+		{ name: 'Soporte', href: '/support' },
 		{ name: 'Legal y Privacidad', href: '/legal' },
-		{ name: 'Accesibilidad', href: '/accesibilidad' },
-		{ name: 'Tienda', href: '/tienda' }
+		{ name: 'Accesibilidad', href: '/accessibility' },
+		{ name: 'Tienda', href: '/store' }
 	];
 
 	function navigateTo(href: string) {

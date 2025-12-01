@@ -1,3 +1,24 @@
+<!--
+  @component LobbyEmbed
+
+  Embeds the Unity WebGL game inside an iframe with Navbar and Footer.
+
+  ## Features
+
+  - Displays a Navbar at the top and Footer at the bottom.
+  - Embeds the Unity game using an iframe sourced from the environment variable VITE_AZURE_GAME_URL.
+  - Handles iframe load events with a console log.
+  - Responsive layout with centered iframe and styling.
+
+  ## Props
+
+  None.
+
+  ## Usage
+
+  <LobbyEmbed />
+-->
+  
 <script lang="ts">
 	import Navbar from './Navbar.svelte';
 	import Footer from './Footer.svelte';

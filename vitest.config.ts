@@ -4,12 +4,13 @@ export default defineConfig({
 	test: {
 		globals: true,
 		environment: 'jsdom',
+		setupFiles: './src/setupTests.ts',
 
 		coverage: {
-			provider: 'istanbul',
+      		provider: 'istanbul',
 			reportsDirectory: 'coverage',
-			reporter: ['lcov', 'json', 'text', 'html'],
-
+			reporter: ['text', 'lcov', 'json', 'html'],
+			include: ['src/lib/**/*.{ts,svelte}', 'src/routes/**/*.{ts,svelte}'],
 			exclude: [
 				'node_modules/**',
 				'.svelte-kit/**',
@@ -17,7 +18,8 @@ export default defineConfig({
 				'dist/**',
 				'coverage/**',
 				'vite.config.*',
-				'vitest.config.*'
+				'vitest.config.*', 
+				'**/*.svelte'
 			]
 		}
 	}
