@@ -111,12 +111,11 @@ jobs:
         run: |
           echo "Coverage artifact content:"
           find coverage -type f | sed 's/^/ - /'
+          ls -la coverage
 
       # Step 6: Run SonarCloud scan
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
-        with:
-          args: -X
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
