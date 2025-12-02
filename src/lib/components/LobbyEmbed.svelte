@@ -25,7 +25,8 @@
 	import { authStore } from '$lib/authStore';
 	import { onMount } from 'svelte';
 
-	const iframeSrc = "https://anquilosaurios-development-webgl-a3ewf7dehzgugtbn.eastus-01.azurewebsites.net";
+	const iframeSrc =
+		'https://anquilosaurios-development-webgl-a3ewf7dehzgugtbn.eastus-01.azurewebsites.net';
 
 	let iframeEl: HTMLIFrameElement | null = null;
 	let verificationState: 'idle' | 'loading' | 'verifying' | 'success' | 'error' = 'idle';
