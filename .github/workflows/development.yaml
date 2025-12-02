@@ -111,7 +111,6 @@ jobs:
         run: |
           echo "Coverage artifact content:"
           find coverage -type f | sed 's/^/ - /'
-          ls -la coverage
 
       # Step 6: Run SonarCloud scan
       - name: SonarCloud Scan

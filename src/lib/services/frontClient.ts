@@ -36,8 +36,8 @@ export const FrontClient = {
 	 * Fetches a list of events.
 	 * @returns {Promise<string[]>} A promise that resolves to an array of event names.
 	 */
-	async fetchEvents(): Promise<string[]> {
-		return Promise.resolve(['Event A', 'Event B', 'Event C']);
+		async fetchEvents(): Promise<string[]> {
+		return ['Event A', 'Event B', 'Event C'];
 	},
 
 	/**
@@ -46,7 +46,7 @@ export const FrontClient = {
 	 * @returns {Promise<Asset>} A promise that resolves to the asset with its signed URL.
 	 */
 	async getAssetSignedUrl(assetKey: string): Promise<Asset> {
-		return Promise.resolve({ key: assetKey, signedUrl: '', version: '1.0' });
+		return { key: assetKey, signedUrl: '', version: '1.0' };
 	},
 
 	/**
@@ -55,6 +55,6 @@ export const FrontClient = {
 	 * @returns {Promise<UserProfile>} A promise that resolves to the user's profile.
 	 */
 	async getProfile(userId: string): Promise<UserProfile> {
-		return Promise.resolve({ id: userId, name: 'Demo User' });
+		return { id: userId, name: 'Demo User' };
 	}
 };
