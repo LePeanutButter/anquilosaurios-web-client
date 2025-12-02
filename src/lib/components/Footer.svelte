@@ -1,3 +1,19 @@
+<!--
+  @component Footer
+
+  Renders the site footer with copyright information and link buttons.
+
+  ## Features
+
+  - Displays the current year automatically.
+  - Includes buttons for Términos, Privacidad, and Contacto.
+  - Styled with centered layout and hover effects for links.
+
+  ## Usage
+
+  <Footer />
+-->
+
 <script lang="ts">
 	let currentYear = new Date().getFullYear();
 </script>

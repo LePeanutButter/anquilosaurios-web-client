@@ -61,15 +61,7 @@ jobs:
       - name: Run Vitest with coverage
         run: npm run test:coverage
 
-      # Step 6: Upload test results
-      - name: Upload Test Results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: Test-Results
-          path: ./coverage
-
-      # Step 7: Upload coverage results (lcov / json)
+      # Step 6: Upload coverage results (lcov / json)
       - name: Upload Coverage Artifacts
         uses: actions/upload-artifact@v4
         if: always()
@@ -120,7 +112,18 @@ jobs:
           echo "Coverage artifact content:"
           find coverage -type f | sed 's/^/ - /'
 
-      # Step 6: Run SonarCloud scan
+      # Step 6: Set up Node.js (required by SonarCloud for some analysis)
+      - name: Set up Node.js for Sonar
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Step 7: Install npm dependencies (required by SonarCloud scanner)
+      - name: Install npm dependencies for Sonar
+        run: |
+          npm ci --prefer-offline --no-audit
+
+      # Step 8: Run SonarCloud scan
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         env:
@@ -201,7 +204,7 @@ jobs:
       - name: Login to Azure using service principal
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_DEV_ENVIRONMENT }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # Step 3: Deploy the downloaded build to the Azure Web App service
       - name: Deploy to Azure Web App
