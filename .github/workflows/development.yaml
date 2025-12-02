@@ -75,6 +75,7 @@ jobs:
   # =========================================
   sonar_scan:
     name: Sonar Cloud static analysis
+    if: github.event_name == 'pull_request'
     needs: test_and_coverage
     runs-on: ubuntu-latest
     steps:
@@ -138,6 +139,7 @@ jobs:
     name: Build Stage for Anquilosaurios (Development)
     needs: sonar_scan
     runs-on: ubuntu-latest
+    if: ${{ (needs.sonar_scan.result == 'success') || (github.event_name == 'push') }}
     strategy:
       matrix:
         node-version: [20.x]
