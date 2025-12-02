@@ -2,11 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { authService } from '../authService';
 import { authStore } from '../authStore';
 
-// Mock global fetch
-global.fetch = vi.fn();
+globalThis.fetch = vi.fn();
 const mockFetch = vi.mocked(fetch);
 
-// Espías de authStore
 vi.spyOn(authStore, 'login');
 vi.spyOn(authStore, 'logout');
 vi.spyOn(authStore, 'setLoading');
@@ -130,5 +128,79 @@ describe('authService', () => {
 
 		expect(authStore.logout).toHaveBeenCalled();
 		expect(result).toBe(false);
+	});
+
+	it('request should include Authorization header if token exists', async () => {
+		vi.spyOn(authStore, 'subscribe').mockImplementation((fn) => {
+			fn({
+				user: null,
+				token: 'test-token',
+				isAuthenticated: true,
+				isLoading: false
+			});
+			return () => {};
+		});
+
+		mockFetch.mockResolvedValue({
+			ok: true,
+			json: () => Promise.resolve({ data: 'ok' })
+		} as Response);
+
+		await authService['request']('/api/test', { method: 'GET' });
+
+		expect(mockFetch).toHaveBeenCalledWith(
+			expect.any(String),
+			expect.objectContaining({
+				headers: expect.objectContaining({
+					Authorization: 'Bearer test-token'
+				})
+			})
+		);
+	});
+
+	it('request should throw error on non-ok response', async () => {
+		mockFetch.mockResolvedValue({
+			ok: false,
+			status: 400,
+			json: () => Promise.resolve({ message: 'Bad Request' })
+		} as Response);
+
+		await expect(authService['request']('/api/test')).rejects.toThrow('Bad Request');
+	});
+
+	it('logout should handle API errors gracefully', async () => {
+		mockFetch.mockRejectedValue(new Error('Network fail'));
+
+		await authService.logout();
+
+		expect(authStore.logout).toHaveBeenCalled();
+	});
+
+	it('register should disable loading on failure', async () => {
+		mockFetch.mockRejectedValue(new Error('fail'));
+
+		await expect(
+			authService.register({
+				name: 'Fail',
+				username: 'fail',
+				email: 'fail@test.com',
+				rawPassword: '123'
+			})
+		).rejects.toThrow('fail');
+
+		expect(authStore.setLoading).toHaveBeenCalledWith(false);
+	});
+
+	it('login should disable loading on failure', async () => {
+		mockFetch.mockRejectedValue(new Error('fail'));
+
+		await expect(
+			authService.login({
+				identifier: 'fail@test.com',
+				rawPassword: '123'
+			})
+		).rejects.toThrow('fail');
+
+		expect(authStore.setLoading).toHaveBeenCalledWith(false);
 	});
 });

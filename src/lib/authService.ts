@@ -26,7 +26,7 @@ interface LoginData {
 }
 
 class AuthService {
-	private baseUrl: string;
+	private readonly baseUrl: string;
 
 	constructor(baseUrl: string = API_BASE_URL) {
 		this.baseUrl = baseUrl;
@@ -137,8 +137,8 @@ class AuthService {
 		try {
 			await this.getCurrentUser();
 			return true;
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		} catch (error) {
+			console.error('checkAuth failed:', error);
 			authStore.logout();
 			return false;
 		}

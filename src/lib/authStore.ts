@@ -100,22 +100,7 @@ function createAuthStore() {
 				return false;
 			}
 
-			try {
-				return true;
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			} catch (error) {
-				if (browser) {
-					localStorage.removeItem('authToken');
-					localStorage.removeItem('user');
-				}
-				set({
-					user: null,
-					token: null,
-					isAuthenticated: false,
-					isLoading: false
-				});
-				return false;
-			}
+			return true;
 		}
 	};
 }
