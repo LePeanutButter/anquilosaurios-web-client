@@ -3,19 +3,16 @@
 # Environment: Development
 # Description:
 #   - Builds and deploys the Anquilosaurios frontend app
-#   - Runs on every push or pull request to 'development'
+#   - Runs on every push to 'development'
 # ===========================================
 
 name: CI Build & Deploy (development)
 
 # -------------------------------------------
-# Trigger: Run workflow on push or PR to 'development' branch
+# Trigger: Run workflow on push to 'development' branch
 # -------------------------------------------
 on:
   push:
-    branches:
-      - development
-  pull_request:
     branches:
       - development
 
@@ -28,7 +25,7 @@ jobs:
   # Purpose: Lint, type-check, and build the app
   # =========================================
   build:
-    name: Build Stage for Anquilosaurios (development)
+    name: Build Stage for Anquilosaurios (Development)
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -40,7 +37,7 @@ jobs:
 
       # Step 2: Set up the Node.js environment
       - name: Set up Node.js environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -77,8 +74,7 @@ jobs:
   # Depends on: build
   # =========================================
   deploy:
-    if: github.event_name == 'push'
-    name: Deploy Stage for Anquilosaurios (Staging)
+    name: Deploy Stage for Anquilosaurios (development)
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -96,7 +92,7 @@ jobs:
       - name: Login to Azure using service principal
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_DEV_ENVIRONMENT }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # Step 3: Deploy the downloaded build to the Azure Web App service
       - name: Deploy to Azure Web App

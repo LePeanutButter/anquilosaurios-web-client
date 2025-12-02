@@ -1,26 +1,22 @@
 # ===========================================
 # GitHub Actions Workflow: CI Build & Deploy
-# Environment: Production
+# Environment: Development
 # Description:
-#   - Runs Vitest tests and generates coverage reports (Istanbul)
-#   - Performs static code analysis with SonarCloud
-#   - Builds, packages, and scans the Anquilosaurios frontend app
-#   - Builds a Docker image and pushes it to Azure Container Registry (ACR)
-#   - Triggers on every push or pull request to the 'main' branch
+#   - Runs Vitest tests and generates coverage (Istanbul)
+#   - Performs SonarCloud static analysis
+#   - Builds the Anquilosaurios frontend app
+#   - Runs on every pull request to 'development'
 # ===========================================
 
-name: CI Build & Deploy (production)
+name: CI Build & Deploy (development)
 
 # -------------------------------------------
-# Trigger: Run workflow on push or PR to 'main' branch
+# Trigger: Run workflow on PR to 'development' branch
 # -------------------------------------------
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
-      - main
+      - development
 
 # -------------------------------------------
 # Jobs Definition
@@ -133,10 +129,10 @@ jobs:
 
   # =========================================
   # Job: Build Stage
-  # Purpose: Lint, type-check, and build the app for production
+  # Purpose: Lint, type-check, and build the app
   # =========================================
   build:
-    name: Build Stage for Anquilosaurios (main)
+    name: Build Stage for Anquilosaurios (Development)
     needs: sonar_scan
     runs-on: ubuntu-latest
     strategy:
@@ -149,7 +145,7 @@ jobs:
 
       # Step 2: Set up the Node.js environment
       - name: Set up Node.js environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -169,123 +165,13 @@ jobs:
           npm run lint
           npm run check
 
-      # Step 5: Build the application for production
+      # Step 5: Build the application
       - name: Compile source code
         run: npm run build
 
-      # Step 6: Upload build output as artifact for deployment
+      # Step 6: Upload build output as artifact
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: node-app
           path: build
-
-  # =========================================
-  # Job: Build Docker Image
-  # Purpose: Build Docker image from frontend build artifacts
-  # =========================================
-  docker_build:
-    name: Build Docker Image using CI build
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      # Step 1: Checkout the repository to access Dockerfile and context
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # Step 2: Download the frontend build artifacts from the previous build job
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: node-app
-          path: build
-
-      # Step 3: Build Docker image using the downloaded build artifacts
-      - name: Build Docker Image
-        run: docker build -t anquilo-frontend:latest .
-
-      # Step 4: Save the Docker image as a tar archive for artifact storage
-      - name: Save Docker Image
-        run: docker save anquilo-frontend -o frontend.tar
-
-      # Step 5: Upload the saved Docker image tarball as a workflow artifact
-      - name: Upload Docker image artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-image
-          path: frontend.tar
-
-  # =========================================
-  # Job: Security Scan (Trivy)
-  # Purpose: Scan Docker image for vulnerabilities
-  # =========================================
-  trivy_scan:
-    name: Run Trivy Security Scan
-    needs: docker_build
-    runs-on: ubuntu-latest
-    steps:
-      # Step 1: Download the Docker image artifact created in the previous job
-      - name: Download docker image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: docker-image
-          path: .
-
-      # Step 2: Load the Docker image from the tar archive into Docker
-      - name: Load Docker image
-        run: docker load -i frontend.tar
-
-      # Step 3: Install Trivy security scanner on the runner
-      - name: Install Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install wget -y
-          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.2_Linux-64bit.deb
-          sudo dpkg -i trivy_0.50.2_Linux-64bit.deb
-
-      # Step 4: Scan the Docker image for HIGH and CRITICAL vulnerabilities; fail job if found
-      - name: Run Trivy Scan
-        run: trivy image --exit-code 1 --severity HIGH,CRITICAL anquilo-frontend:latest
-
-  # =========================================
-  # Job: Push Docker Image to ACR
-  # Purpose: Deploy Docker image to Azure Container Registry
-  # =========================================
-  push_to_acr:
-    if: github.event_name == 'push'
-    name: Push Docker Image to ACR
-    needs: trivy_scan
-    runs-on: ubuntu-latest
-    steps:
-      # Step 1: Checkout repository
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # Step 2: Download Docker image artifact from previous job
-      - uses: actions/download-artifact@v4
-        with:
-          name: docker-image
-          path: .
-
-      # Step 3: Load the Docker image from the tar archive
-      - name: Load Docker image
-        run: docker load -i frontend.tar
-
-      # Step 4: Log in to Azure using a service principal from secrets
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      # Step 5: Log in to Azure Container Registry (ACR)
-      - name: ACR Login
-        run: az acr login --name ${{ secrets.ACR_NAME }}
-
-      # Step 6: Tag Docker image for pushing to ACR
-      - name: Tag Image for ACR
-        run: |
-          docker tag anquilo-frontend:latest ${{ secrets.ACR_NAME }}.azurecr.io/svelte-frontend:latest
-
-      # Step 7: Push the Docker image to ACR
-      - name: Push to ACR
-        run: docker push ${{ secrets.ACR_NAME }}.azurecr.io/svelte-frontend:latest

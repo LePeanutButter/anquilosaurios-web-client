@@ -1,3 +1,25 @@
+<!--
+  @component PlayNow
+
+  Landing page for POWER GARDEN: Juicy Brawl! with hero section, advertisement, and call-to-action.
+
+  ## Features
+
+  - Displays a hero section with welcome message and game description.
+  - Includes a CTA button to start the game.
+  - Shows an AdBanner below the hero section.
+  - Navbar and Footer are included for site navigation.
+  - Once "Jugar Ahora" is clicked, the LobbyEmbed component is shown to start the game.
+
+  ## Props
+
+  None.
+
+  ## Usage
+
+  <PlayNow />
+-->
+
 <script lang="ts">
 	import CTA from './CTA.svelte';
 	import AdBanner from './AdBanner.svelte';

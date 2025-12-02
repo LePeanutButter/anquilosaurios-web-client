@@ -1,3 +1,17 @@
+<!--
+  @component AdBanner
+
+  Renders a simple advertisement banner with an image.
+
+  ## Props
+
+  - `altText` (string) – Alternative text for the image. Default: `'Publicidad del juego'`
+
+  ## Example
+  
+  <AdBanner altText="Banner promocional" />
+-->
+
 <script lang="ts">
 	export let altText: string = 'Publicidad del juego';
 </script>

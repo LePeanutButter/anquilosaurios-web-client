@@ -1,3 +1,17 @@
+<!--
+  @component CTA
+
+  Renders a customizable call-to-action button.
+
+  ## Props
+
+  - `text` (string) – The label displayed on the button. Default: 'Play Now'
+  - `onClick` (function) – Callback function triggered when the button is clicked. Default: empty function
+
+  ## Usage
+  
+  <CTA text="Start Game" onClick={startGameHandler} />
+-->
 <script lang="ts">
 	export let text = 'Play Now';
 	export let onClick: () => void = () => {};
