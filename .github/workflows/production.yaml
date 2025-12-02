@@ -55,8 +55,10 @@ jobs:
           restore-keys: npm-${{ runner.os }}
 
       # Step 4: Install dependencies
-      - name: Install dependencies
-        run: npm ci
+      - name: Clean Install dependencies to resolve native dependency issue
+        run: |
+          rm -rf node_modules
+          npm ci
 
       # Step 5: Run tests with coverage (Istanbul)
       - name: Run Vitest with coverage

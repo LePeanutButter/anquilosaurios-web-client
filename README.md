@@ -89,6 +89,8 @@ UI designs and user flows are maintained in **Figma**, with system diagrams avai
 
 ## License
 
-[MIT](/LICENSE) © Richard Littauer
+[MIT](/LICENSE) © Anquilosaurios Team
 
-This README follows the <u>**Standard Readme**</u> specification.
+---
+
+This **README** follows the Standard Readme specification.

@@ -16,7 +16,7 @@
   This component is mapped to the root route (`/`) by SvelteKit.
 -->
 <script lang="ts">
-	import PlayNow from '../lib/components/PlayNow.svelte';
+	import PlayNow from '$lib/components/PlayNow.svelte';
 </script>
 
 <PlayNow />
