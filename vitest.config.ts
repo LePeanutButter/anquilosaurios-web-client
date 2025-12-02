@@ -19,7 +19,8 @@ export default defineConfig({
 				'coverage/**',
 				'vite.config.*',
 				'vitest.config.*',
-				'**/*.svelte'
+				'**/*.svelte',
+				'**/*.spec.ts'
 			]
 		}
 	}

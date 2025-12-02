@@ -112,7 +112,18 @@ jobs:
           echo "Coverage artifact content:"
           find coverage -type f | sed 's/^/ - /'
 
-      # Step 6: Run SonarCloud scan
+      # Step 6: Set up Node.js (required by SonarCloud for some analysis)
+      - name: Set up Node.js for Sonar
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Step 7: Install npm dependencies (required by SonarCloud scanner)
+      - name: Install npm dependencies for Sonar
+        run: |
+          npm ci --prefer-offline --no-audit
+
+      # Step 8: Run SonarCloud scan
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         env:
