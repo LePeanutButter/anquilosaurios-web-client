@@ -10,7 +10,7 @@ export default defineConfig({
 			provider: 'istanbul',
 			reportsDirectory: 'coverage',
 			reporter: ['text', 'lcov', 'json', 'html'],
-			include: ['src/lib/**/*.{ts,svelte}', 'src/routes/**/*.{ts,svelte}'],
+			include: ['src/lib/**/*.{ts,svelte}', 'src/routes/**/*.{ts,svelte}', '**/*.spec.ts','**/__tests__/**','**/*.test.ts'],
 			exclude: [
 				'node_modules/**',
 				'.svelte-kit/**',
@@ -19,8 +19,7 @@ export default defineConfig({
 				'coverage/**',
 				'vite.config.*',
 				'vitest.config.*',
-				'**/*.svelte',
-				'**/*.spec.ts'
+				'**/*.svelte'
 			]
 		}
 	}
