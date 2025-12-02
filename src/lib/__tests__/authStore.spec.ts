@@ -44,7 +44,14 @@ describe('authStore', () => {
 
 	it('logout should clear everything', () => {
 		authStore.login(
-			{ id: '1', name: 'Test', username: 't', email: 't@test', isAdmin: false, authProvider: 'local' },
+			{
+				id: '1',
+				name: 'Test',
+				username: 't',
+				email: 't@test',
+				isAdmin: false,
+				authProvider: 'local'
+			},
 			'abc'
 		);
 

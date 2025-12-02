@@ -1,151 +1,148 @@
 import { authStore } from './authStore';
 import type { User } from './authStore';
 
-const API_BASE_URL = 'http://localhost:5102'; 
+const API_BASE_URL = 'http://localhost:5102';
 
 interface ApiResponse<T> {
-    data: T;
-    message: string;
+	data: T;
+	message: string;
 }
 
 interface LoginResponse {
-    user: User;
-    token: string;
+	user: User;
+	token: string;
 }
 
 interface RegisterData {
-    name: string;
-    username: string;
-    email: string;
-    rawPassword: string;
+	name: string;
+	username: string;
+	email: string;
+	rawPassword: string;
 }
 
 interface LoginData {
-    identifier: string;
-    rawPassword: string;
+	identifier: string;
+	rawPassword: string;
 }
 
 class AuthService {
-    private baseUrl: string;
+	private baseUrl: string;
 
-    constructor(baseUrl: string = API_BASE_URL) {
-        this.baseUrl = baseUrl;
-    }
+	constructor(baseUrl: string = API_BASE_URL) {
+		this.baseUrl = baseUrl;
+	}
 
-    private getToken(): string | null {
-        let token: string | null = null;
-        authStore.subscribe(state => {
-            token = state.token;
-        })();
-        return token;
-    }
+	private getToken(): string | null {
+		let token: string | null = null;
+		authStore.subscribe((state) => {
+			token = state.token;
+		})();
+		return token;
+	}
 
-    private async request<T>(
-        endpoint: string,
-        options: RequestInit = {}
-    ): Promise<ApiResponse<T>> {
-        const url = `${this.baseUrl}${endpoint}`;
-        
-        const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
-        };
+	private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
+		const url = `${this.baseUrl}${endpoint}`;
 
-        if (options.headers) {
-            const optionsHeaders = options.headers as Record<string, string>;
-            Object.assign(headers, optionsHeaders);
-        }
+		const headers: Record<string, string> = {
+			'Content-Type': 'application/json'
+		};
 
-        const token = this.getToken();
-        if (token && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/register')) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
+		if (options.headers) {
+			const optionsHeaders = options.headers as Record<string, string>;
+			Object.assign(headers, optionsHeaders);
+		}
 
-        try {
-            const response = await fetch(url, {
-                ...options,
-                headers
-            });
+		const token = this.getToken();
+		if (token && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/register')) {
+			headers['Authorization'] = `Bearer ${token}`;
+		}
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
-                throw new Error(errorData?.message || `Error: ${response.status}`);
-            }
+		try {
+			const response = await fetch(url, {
+				...options,
+				headers
+			});
 
-            return await response.json();
-        } catch (error) {
-            console.error('API Error:', error);
-            throw error;
-        }
-    }
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => null);
+				throw new Error(errorData?.message || `Error: ${response.status}`);
+			}
 
-    async register(data: RegisterData): Promise<LoginResponse> {
-        authStore.setLoading(true);
-        
-        try {
-            const response = await this.request<LoginResponse>('/api/auth/register', {
-                method: 'POST',
-                body: JSON.stringify(data)
-            });
+			return await response.json();
+		} catch (error) {
+			console.error('API Error:', error);
+			throw error;
+		}
+	}
 
-            authStore.login(response.data.user, response.data.token);
-            
-            return response.data;
-        } catch (error) {
-            authStore.setLoading(false);
-            throw error;
-        }
-    }
+	async register(data: RegisterData): Promise<LoginResponse> {
+		authStore.setLoading(true);
 
-    async login(data: LoginData): Promise<LoginResponse> {
-        authStore.setLoading(true);
-        
-        try {
-            const response = await this.request<LoginResponse>('/api/auth/login', {
-                method: 'POST',
-                body: JSON.stringify(data)
-            });
+		try {
+			const response = await this.request<LoginResponse>('/api/auth/register', {
+				method: 'POST',
+				body: JSON.stringify(data)
+			});
 
-            authStore.login(response.data.user, response.data.token);
-            
-            return response.data;
-        } catch (error) {
-            authStore.setLoading(false);
-            throw error;
-        }
-    }
+			authStore.login(response.data.user, response.data.token);
 
-    async logout(): Promise<void> {
-        try {
-            await this.request('/api/auth/logout', {
-                method: 'POST'
-            });
-        } catch (error) {
-            console.error('Error al hacer logout:', error);
-        } finally {
-            authStore.logout();
-        }
-    }
+			return response.data;
+		} catch (error) {
+			authStore.setLoading(false);
+			throw error;
+		}
+	}
 
-    async getCurrentUser(): Promise<User> {
-        const response = await this.request<User>('/api/auth/me', {
-            method: 'GET'
-        });
+	async login(data: LoginData): Promise<LoginResponse> {
+		authStore.setLoading(true);
 
-        authStore.updateUser(response.data);
-        
-        return response.data;
-    }
+		try {
+			const response = await this.request<LoginResponse>('/api/auth/login', {
+				method: 'POST',
+				body: JSON.stringify(data)
+			});
 
-    async checkAuth(): Promise<boolean> {
-        try {
-            await this.getCurrentUser();
-            return true;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
-            authStore.logout();
-            return false;
-        }
-    }
+			authStore.login(response.data.user, response.data.token);
+
+			return response.data;
+		} catch (error) {
+			authStore.setLoading(false);
+			throw error;
+		}
+	}
+
+	async logout(): Promise<void> {
+		try {
+			await this.request('/api/auth/logout', {
+				method: 'POST'
+			});
+		} catch (error) {
+			console.error('Error al hacer logout:', error);
+		} finally {
+			authStore.logout();
+		}
+	}
+
+	async getCurrentUser(): Promise<User> {
+		const response = await this.request<User>('/api/auth/me', {
+			method: 'GET'
+		});
+
+		authStore.updateUser(response.data);
+
+		return response.data;
+	}
+
+	async checkAuth(): Promise<boolean> {
+		try {
+			await this.getCurrentUser();
+			return true;
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		} catch (error) {
+			authStore.logout();
+			return false;
+		}
+	}
 }
 
 export const authService = new AuthService();

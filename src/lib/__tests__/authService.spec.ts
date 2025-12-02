@@ -45,10 +45,7 @@ describe('authService', () => {
 			rawPassword: '123'
 		});
 
-		expect(authStore.login).toHaveBeenCalledWith(
-			mockResponse.data.user,
-			mockResponse.data.token
-		);
+		expect(authStore.login).toHaveBeenCalledWith(mockResponse.data.user, mockResponse.data.token);
 
 		expect(output).toEqual(mockResponse.data);
 	});

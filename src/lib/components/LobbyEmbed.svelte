@@ -3,85 +3,66 @@
 	import Footer from './Footer.svelte';
 	import { authStore } from '$lib/authStore';
 	import { onMount } from 'svelte';
-	
-	// CAMBIO: Usar build local en lugar de Azure
-	// const iframeSrc = "https://anquilosaurios-development-webgl-a3ewf7dehzgugtbn.eastus-01.azurewebsites.net";
-	const iframeSrc = "/unity-webgl-build/index.html"; // ← Build local
-	
+
+	const iframeSrc = "https://anquilosaurios-development-webgl-a3ewf7dehzgugtbn.eastus-01.azurewebsites.net";
+
 	let iframeEl: HTMLIFrameElement | null = null;
-	
-	// Estados de verificación
 	let verificationState: 'idle' | 'loading' | 'verifying' | 'success' | 'error' = 'idle';
 	let verificationMessage = '';
 	let verificationProgress = 0;
 	let showIframe = false;
 
-	// Datos del usuario autenticado
 	let userToken: string | null = null;
 	let userName: string | null = null;
 	let userEmail: string | null = null;
 
-	/**
-	 * Obtener datos del usuario autenticado
-	 */
 	onMount(() => {
-		const unsubscribe = authStore.subscribe(state => {
+		const unsubscribe = authStore.subscribe((state) => {
 			userToken = state.token;
 			userName = state.user?.name || null;
 			userEmail = state.user?.email || null;
-			
+
 			console.log('[LOBBY] Usuario autenticado:', {
-				token: userToken ? 'Presente' : 'No presente',
-				name: userName,
-				email: userEmail
+				token: userToken ? 'Presente' : 'No presente (anónimo)',
+				name: userName || 'Anónimo',
+				email: userEmail || 'Sin email'
 			});
 		});
 
-		// Iniciar verificación (o saltar si usas build local)
 		skipVerificationAndLoad();
 
 		return unsubscribe;
 	});
 
-	/**
-	 * Función para saltar la verificación cuando usas build local
-	 */
 	function skipVerificationAndLoad() {
 		verificationState = 'loading';
 		verificationMessage = 'Cargando juego...';
 		verificationProgress = 50;
-		
+
 		setTimeout(() => {
 			verificationState = 'success';
 			verificationProgress = 100;
 			verificationMessage = 'Juego listo';
-			
+
 			setTimeout(() => {
 				showIframe = true;
 			}, 300);
 		}, 1000);
 	}
 
-	/**
-	 * Cuando el iframe carga, enviar los datos del usuario a Unity
-	 */
 	function onIframeLoad() {
 		console.log('[LOBBY] Unity iframe loaded');
-		
+
 		if (!iframeEl || !iframeEl.contentWindow) {
 			console.error('[LOBBY] No se pudo acceder al iframe');
 			return;
 		}
 
-		// Esperar un poco para que Unity esté listo
 		setTimeout(() => {
 			sendUserDataToUnity();
 		}, 2000);
 	}
 
-	/**
-	 * Enviar datos del usuario a Unity mediante postMessage
-	 */
 	function sendUserDataToUnity() {
 		if (!iframeEl || !iframeEl.contentWindow) {
 			console.error('[LOBBY] No se pudo acceder al iframe');
@@ -90,18 +71,16 @@
 
 		const userData = {
 			type: 'USER_AUTH_DATA',
-			token: userToken,
-			userName: userName,
-			userEmail: userEmail,
+			token: userToken || null,
+			userName: userName || null,
+			userEmail: userEmail || null,
 			timestamp: Date.now()
 		};
 
 		console.log('[LOBBY] Enviando datos a Unity:', userData);
 
-		// Enviar mensaje al iframe de Unity
 		iframeEl.contentWindow.postMessage(userData, '*');
 
-		// Reintentar cada 3 segundos por si Unity aún no está listo
 		let retryCount = 0;
 		const retryInterval = setInterval(() => {
 			if (retryCount >= 10) {
@@ -116,18 +95,13 @@
 		}, 3000);
 	}
 
-	/**
-	 * Escuchar mensajes desde Unity
-	 */
 	function handleMessageFromUnity(event: MessageEvent) {
-		// Validar que el mensaje viene de nuestro iframe
 		if (event.source !== iframeEl?.contentWindow) {
 			return;
 		}
 
 		console.log('[LOBBY] Mensaje recibido de Unity:', event.data);
 
-		// Manejar diferentes tipos de mensajes
 		if (event.data.type === 'UNITY_READY') {
 			console.log('[LOBBY] Unity está listo, enviando datos...');
 			sendUserDataToUnity();
@@ -137,7 +111,6 @@
 	}
 
 	onMount(() => {
-		// Escuchar mensajes de Unity
 		window.addEventListener('message', handleMessageFromUnity);
 
 		return () => {
@@ -148,17 +121,18 @@
 	async function calculateSHA256(buffer: ArrayBuffer): Promise<string> {
 		const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
 		const hashArray = Array.from(new Uint8Array(hashBuffer));
-		const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+		const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 		return hashHex;
 	}
 
 	/**
 	 * Descarga un archivo y calcula su hash
 	 */
-	async function fetchAndHash(url: string): Promise<{ buffer: ArrayBuffer; hash: string }> {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	async function _fetchAndHash(url: string): Promise<{ buffer: ArrayBuffer; hash: string }> {
 		const response = await fetch(url, {
 			method: 'GET',
-			credentials: 'omit',
+			credentials: 'omit'
 		});
 
 		if (!response.ok) {
@@ -167,18 +141,19 @@
 
 		const buffer = await response.arrayBuffer();
 		const hash = await calculateSHA256(buffer);
-		
+
 		return { buffer, hash };
 	}
 
 	/**
 	 * Obtiene la lista de archivos críticos del Build de Unity
 	 */
-	async function getUnityFiles(baseUrl: string): Promise<string[]> {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	async function _getUnityFiles(baseUrl: string): Promise<string[]> {
 		try {
 			const manifestUrl = `${baseUrl}/webgl-manifest.json`;
 			const response = await fetch(manifestUrl);
-			
+
 			if (response.ok) {
 				const manifest = await response.json();
 				return Object.keys(manifest.files || {});
@@ -198,7 +173,8 @@
 	/**
 	 * Verifica la integridad de todos los archivos de Unity
 	 */
-	async function verifyIntegrity() {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	async function _verifyIntegrity() {
 		console.log('[LOBBY] Verificación de integridad omitida (build local)');
 		skipVerificationAndLoad();
 	}
@@ -221,7 +197,7 @@
 		<div class="verification-overlay">
 			<div class="verification-card">
 				<h2>Cargando Juego</h2>
-				
+
 				{#if verificationState === 'idle' || verificationState === 'loading' || verificationState === 'verifying'}
 					<div class="loading-container">
 						<div class="spinner"></div>
@@ -235,12 +211,8 @@
 					<div class="error-container">
 						<div class="error-icon"></div>
 						<p class="error-message">{verificationMessage}</p>
-						<p class="error-detail">
-							Hubo un problema al cargar el juego.
-						</p>
-						<button class="retry-button" on:click={retryVerification}>
-							Reintentar
-						</button>
+						<p class="error-detail">Hubo un problema al cargar el juego.</p>
+						<button class="retry-button" on:click={retryVerification}> Reintentar </button>
 					</div>
 				{:else if verificationState === 'success'}
 					<div class="success-container">
@@ -327,8 +299,12 @@
 	}
 
 	@keyframes spin {
-		0% { transform: rotate(0deg); }
-		100% { transform: rotate(360deg); }
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
 	}
 
 	.status-message {

@@ -47,7 +47,6 @@
 			<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
 				{#each menuItems as item (item.href)}
 					<li class="nav-item">
-						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 						<a
 							class="nav-link"
 							href={item.href}
@@ -58,20 +57,18 @@
 					</li>
 				{/each}
 
-				<!-- Auth section -->
 				{#if $isAuthenticated && $currentUser}
 					<li class="nav-item dropdown">
-						<a
+						<button
 							class="nav-link dropdown-toggle user-menu"
-							href="#"
 							id="userDropdown"
-							role="button"
+							type="button"
 							data-bs-toggle="dropdown"
 							aria-expanded="false"
 						>
 							<i class="bi bi-person-circle me-1"></i>
 							{$currentUser.name}
-						</a>
+						</button>
 						<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
 							<li>
 								<span class="dropdown-item-text">
@@ -101,7 +98,7 @@
 					</li>
 				{:else}
 					<li class="nav-item">
-						<a class="nav-link btn btn-outline-light btn-sm px-3 ms-2" href="/">
+						<a class="nav-link btn btn-outline-light btn-sm px-3 ms-2" href="/login">
 							Iniciar Sesión
 						</a>
 					</li>
@@ -142,7 +139,6 @@
 		color: white !important;
 	}
 
-	/* Estilos para el botón de login cuando no está autenticado */
 	.btn-outline-light {
 		border-color: #ffc107;
 		color: #ffc107;
