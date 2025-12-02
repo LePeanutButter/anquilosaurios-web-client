@@ -1,8 +1,13 @@
 <script lang="ts">
 	import Navbar from './Navbar.svelte';
 	import Footer from './Footer.svelte';
+	import { authStore } from '$lib/authStore';
+	import { onMount } from 'svelte';
 	
-	const iframeSrc = import.meta.env.VITE_AZURE_GAME_URL;
+	// CAMBIO: Usar build local en lugar de Azure
+	// const iframeSrc = "https://anquilosaurios-development-webgl-a3ewf7dehzgugtbn.eastus-01.azurewebsites.net";
+	const iframeSrc = "/unity-webgl-build/index.html"; // ← Build local
+	
 	let iframeEl: HTMLIFrameElement | null = null;
 	
 	// Estados de verificación
@@ -11,9 +16,135 @@
 	let verificationProgress = 0;
 	let showIframe = false;
 
+	// Datos del usuario autenticado
+	let userToken: string | null = null;
+	let userName: string | null = null;
+	let userEmail: string | null = null;
+
 	/**
-	 * Calcula el SHA-256 de un ArrayBuffer
+	 * Obtener datos del usuario autenticado
 	 */
+	onMount(() => {
+		const unsubscribe = authStore.subscribe(state => {
+			userToken = state.token;
+			userName = state.user?.name || null;
+			userEmail = state.user?.email || null;
+			
+			console.log('[LOBBY] Usuario autenticado:', {
+				token: userToken ? 'Presente' : 'No presente',
+				name: userName,
+				email: userEmail
+			});
+		});
+
+		// Iniciar verificación (o saltar si usas build local)
+		skipVerificationAndLoad();
+
+		return unsubscribe;
+	});
+
+	/**
+	 * Función para saltar la verificación cuando usas build local
+	 */
+	function skipVerificationAndLoad() {
+		verificationState = 'loading';
+		verificationMessage = 'Cargando juego...';
+		verificationProgress = 50;
+		
+		setTimeout(() => {
+			verificationState = 'success';
+			verificationProgress = 100;
+			verificationMessage = 'Juego listo';
+			
+			setTimeout(() => {
+				showIframe = true;
+			}, 300);
+		}, 1000);
+	}
+
+	/**
+	 * Cuando el iframe carga, enviar los datos del usuario a Unity
+	 */
+	function onIframeLoad() {
+		console.log('[LOBBY] Unity iframe loaded');
+		
+		if (!iframeEl || !iframeEl.contentWindow) {
+			console.error('[LOBBY] No se pudo acceder al iframe');
+			return;
+		}
+
+		// Esperar un poco para que Unity esté listo
+		setTimeout(() => {
+			sendUserDataToUnity();
+		}, 2000);
+	}
+
+	/**
+	 * Enviar datos del usuario a Unity mediante postMessage
+	 */
+	function sendUserDataToUnity() {
+		if (!iframeEl || !iframeEl.contentWindow) {
+			console.error('[LOBBY] No se pudo acceder al iframe');
+			return;
+		}
+
+		const userData = {
+			type: 'USER_AUTH_DATA',
+			token: userToken,
+			userName: userName,
+			userEmail: userEmail,
+			timestamp: Date.now()
+		};
+
+		console.log('[LOBBY] Enviando datos a Unity:', userData);
+
+		// Enviar mensaje al iframe de Unity
+		iframeEl.contentWindow.postMessage(userData, '*');
+
+		// Reintentar cada 3 segundos por si Unity aún no está listo
+		let retryCount = 0;
+		const retryInterval = setInterval(() => {
+			if (retryCount >= 10) {
+				clearInterval(retryInterval);
+				console.log('[LOBBY] Se detuvieron los reintentos de envío');
+				return;
+			}
+
+			console.log(`[LOBBY] Reintentando envío de datos (${retryCount + 1}/10)`);
+			iframeEl?.contentWindow?.postMessage(userData, '*');
+			retryCount++;
+		}, 3000);
+	}
+
+	/**
+	 * Escuchar mensajes desde Unity
+	 */
+	function handleMessageFromUnity(event: MessageEvent) {
+		// Validar que el mensaje viene de nuestro iframe
+		if (event.source !== iframeEl?.contentWindow) {
+			return;
+		}
+
+		console.log('[LOBBY] Mensaje recibido de Unity:', event.data);
+
+		// Manejar diferentes tipos de mensajes
+		if (event.data.type === 'UNITY_READY') {
+			console.log('[LOBBY] Unity está listo, enviando datos...');
+			sendUserDataToUnity();
+		} else if (event.data.type === 'USER_DATA_RECEIVED') {
+			console.log('[LOBBY] Unity confirmó recepción de datos del usuario');
+		}
+	}
+
+	onMount(() => {
+		// Escuchar mensajes de Unity
+		window.addEventListener('message', handleMessageFromUnity);
+
+		return () => {
+			window.removeEventListener('message', handleMessageFromUnity);
+		};
+	});
+
 	async function calculateSHA256(buffer: ArrayBuffer): Promise<string> {
 		const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
 		const hashArray = Array.from(new Uint8Array(hashBuffer));
@@ -45,7 +176,6 @@
 	 */
 	async function getUnityFiles(baseUrl: string): Promise<string[]> {
 		try {
-			// Intenta obtener la lista de archivos del manifest
 			const manifestUrl = `${baseUrl}/webgl-manifest.json`;
 			const response = await fetch(manifestUrl);
 			
@@ -57,7 +187,6 @@
 			console.warn('Could not fetch manifest, using default file patterns', err);
 		}
 
-		// Si no se puede obtener el manifest, usa patrones comunes de Unity WebGL
 		return [
 			'Build/webgl.loader.js',
 			'Build/webgl.framework.js',
@@ -70,99 +199,8 @@
 	 * Verifica la integridad de todos los archivos de Unity
 	 */
 	async function verifyIntegrity() {
-		try {
-			verificationState = 'loading';
-			verificationMessage = 'Descargando manifest de integridad...';
-			verificationProgress = 10;
-
-			// Obtener el manifest con los hashes esperados
-			const manifestUrl = `${iframeSrc}/webgl-manifest.json`;
-			const manifestResponse = await fetch(manifestUrl);
-			
-			if (!manifestResponse.ok) {
-				throw new Error('No se pudo obtener el manifest de integridad');
-			}
-
-			const manifest = await manifestResponse.json();
-			const files = manifest.files || {};
-			const fileList = Object.keys(files);
-
-			if (fileList.length === 0) {
-				throw new Error('El manifest no contiene archivos para verificar');
-			}
-
-			verificationState = 'verifying';
-			verificationMessage = `Verificando ${fileList.length} archivos...`;
-			verificationProgress = 20;
-
-			console.log(`[INTEGRITY] Verificando ${fileList.length} archivos`);
-
-			// Verificar cada archivo
-			const totalFiles = fileList.length;
-			let verifiedFiles = 0;
-			const errors: string[] = [];
-
-			for (const filePath of fileList) {
-				const expectedHash = files[filePath];
-				
-				// Construir URL completa del archivo
-				// El filePath ya viene sin /webgl/, así que lo agregamos
-				const fileUrl = `${iframeSrc}/webgl/${filePath}`;
-				
-				try {
-					console.log(`[INTEGRITY] Verificando: ${filePath}`);
-					
-					const { hash: calculatedHash } = await fetchAndHash(fileUrl);
-					const expectedHashValue = expectedHash.replace('sha256-', '');
-
-					if (calculatedHash !== expectedHashValue) {
-						const error = `Hash mismatch para ${filePath}`;
-						console.error(`[INTEGRITY] ${error}`);
-						console.error(`  Esperado: ${expectedHashValue}`);
-						console.error(`  Calculado: ${calculatedHash}`);
-						errors.push(error);
-					} else {
-						console.log(`[INTEGRITY] ${filePath} verificado`);
-					}
-
-					verifiedFiles++;
-					verificationProgress = 20 + Math.floor((verifiedFiles / totalFiles) * 70);
-					verificationMessage = `Verificando archivo ${verifiedFiles}/${totalFiles}...`;
-					
-				} catch (err) {
-					const error = `Error al verificar ${filePath}: ${err instanceof Error ? err.message : 'Unknown error'}`;
-					console.error(`[INTEGRITY] ${error}`);
-					errors.push(error);
-				}
-			}
-
-			if (errors.length > 0) {
-				verificationState = 'error';
-				verificationMessage = `Falló la verificación de integridad: ${errors.length} archivo(s) con errores`;
-				console.error('[INTEGRITY] Errores encontrados:', errors);
-				return;
-			}
-
-			// Verificación exitosa
-			verificationProgress = 100;
-			verificationState = 'success';
-			verificationMessage = 'Verificación completada exitosamente';
-			console.log('[INTEGRITY] Todos los archivos verificados correctamente');
-			
-			// Mostrar el iframe después de un breve delay
-			setTimeout(() => {
-				showIframe = true;
-			}, 500);
-
-		} catch (err) {
-			verificationState = 'error';
-			verificationMessage = err instanceof Error ? err.message : 'Error desconocido';
-			console.error('[INTEGRITY] Error crítico:', err);
-		}
-	}
-
-	function onIframeLoad() {
-		console.log('[PARENT] Unity WebGL iframe loaded');
+		console.log('[LOBBY] Verificación de integridad omitida (build local)');
+		skipVerificationAndLoad();
 	}
 
 	function retryVerification() {
@@ -170,15 +208,11 @@
 		verificationMessage = '';
 		verificationProgress = 0;
 		showIframe = false;
-		verifyIntegrity();
+		skipVerificationAndLoad();
 	}
-
-	// Iniciar verificación al montar el componente
-	import { onMount } from 'svelte';
-	onMount(() => {
-		verifyIntegrity();
-	});
 </script>
+
+<svelte:window on:message={handleMessageFromUnity} />
 
 <Navbar />
 
@@ -186,7 +220,7 @@
 	{#if !showIframe}
 		<div class="verification-overlay">
 			<div class="verification-card">
-				<h2>Verificación de Seguridad</h2>
+				<h2>Cargando Juego</h2>
 				
 				{#if verificationState === 'idle' || verificationState === 'loading' || verificationState === 'verifying'}
 					<div class="loading-container">
@@ -202,18 +236,17 @@
 						<div class="error-icon"></div>
 						<p class="error-message">{verificationMessage}</p>
 						<p class="error-detail">
-							Los archivos del juego no pasaron la verificación de integridad.
-							Esto podría indicar un problema de seguridad.
+							Hubo un problema al cargar el juego.
 						</p>
 						<button class="retry-button" on:click={retryVerification}>
-							Reintentar Verificación
+							Reintentar
 						</button>
 					</div>
 				{:else if verificationState === 'success'}
 					<div class="success-container">
 						<div class="success-icon"></div>
-						<p class="success-message">Verificación completada</p>
-						<p class="success-detail">Cargando juego...</p>
+						<p class="success-message">Juego listo</p>
+						<p class="success-detail">Iniciando...</p>
 					</div>
 				{/if}
 			</div>
@@ -239,7 +272,7 @@
 		justify-content: center;
 		align-items: center;
 		min-height: 100vh;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		background: white !important;
 	}
 
 	.game-frame {
@@ -288,7 +321,7 @@
 		width: 60px;
 		height: 60px;
 		border: 4px solid #f3f3f3;
-		border-top: 4px solid #667eea;
+		border-top: 4px solid white;
 		border-radius: 50%;
 		animation: spin 1s linear infinite;
 	}
@@ -315,7 +348,7 @@
 
 	.progress-fill {
 		height: 100%;
-		background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+		background: linear-gradient(90deg, white 0%, #003d80 100%);
 		transition: width 0.3s ease;
 	}
 
@@ -350,9 +383,9 @@
 	.retry-button {
 		margin-top: 1.5rem;
 		padding: 0.75rem 2rem;
-		background: #667eea;
-		color: white;
-		border: none;
+		background: white;
+		color: #003d80;
+		border: 2px solid #003d80;
 		border-radius: 8px;
 		font-size: 1rem;
 		font-weight: 600;
@@ -361,9 +394,10 @@
 	}
 
 	.retry-button:hover {
-		background: #5568d3;
+		background: #003d80;
+		color: white;
 		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+		box-shadow: 0 4px 12px rgba(0, 61, 128, 0.4);
 	}
 
 	.retry-button:active {

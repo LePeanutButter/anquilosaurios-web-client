@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { resolveRoute } from '$app/paths'; // 🔹 Agregado para resolver rutas
+	import { resolveRoute } from '$app/paths';
+	import { authService } from '$lib/authService';
+	import { currentUser, isAuthenticated } from '$lib/authStore';
 
 	onMount(() => {
 		console.log('Navbar montada');
@@ -17,6 +19,11 @@
 
 	function navigateTo(href: string) {
 		goto(resolveRoute(href as unknown as `/`));
+	}
+
+	async function handleLogout() {
+		await authService.logout();
+		goto('/');
 	}
 </script>
 
@@ -50,6 +57,55 @@
 						</a>
 					</li>
 				{/each}
+
+				<!-- Auth section -->
+				{#if $isAuthenticated && $currentUser}
+					<li class="nav-item dropdown">
+						<a
+							class="nav-link dropdown-toggle user-menu"
+							href="#"
+							id="userDropdown"
+							role="button"
+							data-bs-toggle="dropdown"
+							aria-expanded="false"
+						>
+							<i class="bi bi-person-circle me-1"></i>
+							{$currentUser.name}
+						</a>
+						<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+							<li>
+								<span class="dropdown-item-text">
+									<small class="text-muted">{$currentUser.email}</small>
+								</span>
+							</li>
+							<li><hr class="dropdown-divider" /></li>
+							<li>
+								<a class="dropdown-item" href="/cuenta">
+									<i class="bi bi-gear me-2"></i>Mi Cuenta
+								</a>
+							</li>
+							{#if $currentUser.isAdmin}
+								<li>
+									<a class="dropdown-item" href="/admin">
+										<i class="bi bi-shield-lock me-2"></i>Panel Admin
+									</a>
+								</li>
+							{/if}
+							<li><hr class="dropdown-divider" /></li>
+							<li>
+								<button class="dropdown-item text-danger" on:click={handleLogout}>
+									<i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+								</button>
+							</li>
+						</ul>
+					</li>
+				{:else}
+					<li class="nav-item">
+						<a class="nav-link btn btn-outline-light btn-sm px-3 ms-2" href="/">
+							Iniciar Sesión
+						</a>
+					</li>
+				{/if}
 			</ul>
 		</div>
 	</div>
@@ -66,5 +122,35 @@
 
 	.nav-link:hover {
 		color: #ffc107;
+	}
+
+	.user-menu {
+		color: #ffc107 !important;
+		font-weight: 500;
+	}
+
+	.dropdown-item {
+		cursor: pointer;
+	}
+
+	.dropdown-item:active {
+		background-color: #0d6efd;
+	}
+
+	.dropdown-item.text-danger:hover {
+		background-color: #dc3545;
+		color: white !important;
+	}
+
+	/* Estilos para el botón de login cuando no está autenticado */
+	.btn-outline-light {
+		border-color: #ffc107;
+		color: #ffc107;
+	}
+
+	.btn-outline-light:hover {
+		background-color: #ffc107;
+		color: #000;
+		border-color: #ffc107;
 	}
 </style>
