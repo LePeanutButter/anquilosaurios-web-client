@@ -36,7 +36,7 @@ export const FrontClient = {
 	 * Fetches a list of events.
 	 * @returns {Promise<string[]>} A promise that resolves to an array of event names.
 	 */
-		async fetchEvents(): Promise<string[]> {
+	async fetchEvents(): Promise<string[]> {
 		return ['Event A', 'Event B', 'Event C'];
 	},
 

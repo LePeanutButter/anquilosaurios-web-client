@@ -10,7 +10,13 @@ export default defineConfig({
 			provider: 'istanbul',
 			reportsDirectory: 'coverage',
 			reporter: ['text', 'lcov', 'json', 'html'],
-			include: ['src/lib/**/*.{ts,svelte}', 'src/routes/**/*.{ts,svelte}', '**/*.spec.ts','**/__tests__/**','**/*.test.ts'],
+			include: [
+				'src/lib/**/*.{ts,svelte}',
+				'src/routes/**/*.{ts,svelte}',
+				'**/*.spec.ts',
+				'**/__tests__/**',
+				'**/*.test.ts'
+			],
 			exclude: [
 				'node_modules/**',
 				'.svelte-kit/**',
