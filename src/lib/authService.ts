@@ -1,8 +1,7 @@
 import { authStore } from './authStore';
 import type { User } from './authStore';
 
-const API_BASE_URL =
-	'http://dotnet_backend:5000'; // NOSONAR
+const API_BASE_URL = 'http://dotnet_backend:5000'; // NOSONAR
 
 interface ApiResponse<T> {
 	data: T;
