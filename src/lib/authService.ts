@@ -1,7 +1,8 @@
 import { authStore } from './authStore';
 import type { User } from './authStore';
 
-const API_BASE_URL = "https://anquilosaurios-development-backend-cxgrd0czc8cudsa9.eastus-01.azurewebsites.net";
+const API_BASE_URL =
+	'https://anquilosaurios-development-backend-cxgrd0czc8cudsa9.eastus-01.azurewebsites.net';
 
 interface ApiResponse<T> {
 	data: T;
