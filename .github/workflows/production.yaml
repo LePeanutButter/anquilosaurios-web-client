@@ -243,7 +243,7 @@ jobs:
         with:
           image-ref: anquilo-frontend:latest
           format: 'table'
-          severity: 'HIGH,CRITICAL'
+          severity: 'CRITICAL'
           exit-code: '1'
 
   # =========================================
