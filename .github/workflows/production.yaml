@@ -242,7 +242,7 @@ jobs:
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           image-ref: anquilo-frontend:latest
-          format: 'table' 
+          format: 'table'
           severity: 'HIGH,CRITICAL'
           exit-code: '1'
 
