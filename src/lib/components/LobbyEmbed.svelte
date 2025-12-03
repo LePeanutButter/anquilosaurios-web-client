@@ -25,7 +25,7 @@
 	import { authStore } from '$lib/authStore';
 	import { onMount } from 'svelte';
 
-	const iframeSrc = "/unity-webgl-build/index.html";
+	const iframeSrc = '/unity-webgl-build/index.html';
 
 	let iframeEl: HTMLIFrameElement | null = null;
 	let verificationState: 'idle' | 'loading' | 'verifying' | 'success' | 'error' = 'idle';
