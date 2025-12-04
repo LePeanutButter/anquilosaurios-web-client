@@ -25,8 +25,7 @@
 	import { authStore } from '$lib/authStore';
 	import { onMount } from 'svelte';
 
-	const iframeSrc =
-		'http://20.168.245.216/play';
+	const iframeSrc = 'http://20.168.245.216/play';
 
 	let iframeEl: HTMLIFrameElement | null = null;
 	let verificationState: 'idle' | 'loading' | 'verifying' | 'success' | 'error' = 'idle';
