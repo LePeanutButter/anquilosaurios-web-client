@@ -1,7 +1,7 @@
 import { authStore } from './authStore';
 import type { User } from './authStore';
 
-const API_BASE_URL = 'http://dotnet_backend:5000'; // NOSONAR
+const API_BASE_URL = 'http://dotnet_backend:5000/api'; // NOSONAR
 
 interface ApiResponse<T> {
 	data: T;
@@ -79,7 +79,7 @@ class AuthService {
 		authStore.setLoading(true);
 
 		try {
-			const response = await this.request<LoginResponse>('/api/auth/register', {
+			const response = await this.request<LoginResponse>('/auth/register', {
 				method: 'POST',
 				body: JSON.stringify(data)
 			});
@@ -97,7 +97,7 @@ class AuthService {
 		authStore.setLoading(true);
 
 		try {
-			const response = await this.request<LoginResponse>('/api/auth/login', {
+			const response = await this.request<LoginResponse>('/auth/login', {
 				method: 'POST',
 				body: JSON.stringify(data)
 			});
@@ -113,7 +113,7 @@ class AuthService {
 
 	async logout(): Promise<void> {
 		try {
-			await this.request('/api/auth/logout', {
+			await this.request('/auth/logout', {
 				method: 'POST'
 			});
 		} catch (error) {
@@ -124,7 +124,7 @@ class AuthService {
 	}
 
 	async getCurrentUser(): Promise<User> {
-		const response = await this.request<User>('/api/auth/me', {
+		const response = await this.request<User>('/auth/me', {
 			method: 'GET'
 		});
 

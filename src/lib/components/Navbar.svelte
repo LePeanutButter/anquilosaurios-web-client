@@ -10,11 +10,11 @@
 	});
 
 	const menuItems = [
-		{ name: 'Comunidad', href: '/comunidad' },
-		{ name: 'Soporte', href: '/soporte' },
+		{ name: 'Comunidad', href: '/community' },
+		{ name: 'Soporte', href: '/support' },
 		{ name: 'Legal y Privacidad', href: '/legal' },
-		{ name: 'Accesibilidad', href: '/accesibilidad' },
-		{ name: 'Tienda', href: '/tienda' }
+		{ name: 'Accesibilidad', href: '/accessibility' },
+		{ name: 'Tienda', href: '/store' }
 	];
 
 	function navigateTo(href: string) {
