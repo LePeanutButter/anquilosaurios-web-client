@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { authStore } from '../authStore';
 
-	export let redirectTo: string = '/login';
+	export let redirectTo: string = '/app/login';
 	export let requireAdmin: boolean = false;
 
 	let isLoading = true;

@@ -98,7 +98,7 @@
 					</li>
 				{:else}
 					<li class="nav-item">
-						<a class="nav-link btn btn-outline-light btn-sm px-3 ms-2" href="/login">
+						<a class="nav-link btn btn-outline-light btn-sm px-3 ms-2" href="/app/login">
 							Iniciar Sesión
 						</a>
 					</li>
