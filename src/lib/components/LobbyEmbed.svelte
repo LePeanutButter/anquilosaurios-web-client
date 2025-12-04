@@ -26,7 +26,7 @@
 	import { onMount } from 'svelte';
 
 	const iframeSrc =
-		'https://anquilosaurios-development-webgl-a3ewf7dehzgugtbn.eastus-01.azurewebsites.net';
+		'http://20.168.245.216/play';
 
 	let iframeEl: HTMLIFrameElement | null = null;
 	let verificationState: 'idle' | 'loading' | 'verifying' | 'success' | 'error' = 'idle';
